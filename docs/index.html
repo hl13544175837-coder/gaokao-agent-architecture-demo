@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tab 1｜系统架构总览</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-strong: #ffffff;
+      --line: #dfe8f3;
+      --text: #142235;
+      --muted: #6d7d90;
+      --brand: #3f73ff;
+      --brand-soft: rgba(63, 115, 255, 0.1);
+      --cyan: #60c9ff;
+      --green: #1fa971;
+      --amber: #f5a524;
+      --purple: #7a67ff;
+      --shadow: 0 24px 80px rgba(47, 81, 145, 0.12);
+      --radius-xl: 30px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(96, 201, 255, 0.16), transparent 22%),
+        radial-gradient(circle at 95% 0%, rgba(63, 115, 255, 0.16), transparent 20%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      font-family: "PingFang SC", "SF Pro Display", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    }
+
+    .page {
+      width: min(1440px, calc(100vw - 28px));
+      margin: 18px auto 28px;
+    }
+
+    .header,
+    .canvas,
+    .footer {
+      border-radius: var(--radius-xl);
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .header {
+      padding: 24px 28px;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 4vw, 56px);
+      line-height: 1.03;
+      letter-spacing: -0.04em;
+      max-width: 14ch;
+    }
+
+    .header p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      max-width: 64ch;
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .tab {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.82);
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+      cursor: pointer;
+      appearance: none;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, var(--brand), #5b8bff);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 12px 26px rgba(63, 115, 255, 0.24);
+    }
+
+    .tab.disabled {
+      cursor: default;
+      opacity: 0.75;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .canvas {
+      margin-top: 16px;
+      padding: 24px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .legend span {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: #45607e;
+      background: rgba(255,255,255,0.86);
+      border: 1px solid var(--line);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr) 320px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .column {
+      display: grid;
+      gap: 14px;
+    }
+
+    .block,
+    .agent-core,
+    .base,
+    .output-card {
+      border-radius: var(--radius-lg);
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+
+    .block,
+    .output-card {
+      padding: 18px;
+    }
+
+    .block-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .block-title {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+    }
+
+    .badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      color: var(--brand);
+      background: var(--brand-soft);
+      white-space: nowrap;
+    }
+
+    .block-note {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      color: #415b77;
+      background: #f7fafe;
+      border: 1px solid var(--line);
+    }
+
+    .arrow-col {
+      display: grid;
+      place-items: center;
+      color: var(--brand);
+      font-size: 30px;
+      opacity: 0.9;
+    }
+
+    .center-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .flow-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(63, 115, 255, 0.08), rgba(96, 201, 255, 0.08));
+      border: 1px solid rgba(63, 115, 255, 0.12);
+    }
+
+    .flow-step {
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+      text-align: center;
+      flex: 1;
+    }
+
+    .flow-step strong {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: #fff;
+      color: var(--brand);
+      box-shadow: 0 10px 18px rgba(63, 115, 255, 0.12);
+      font-size: 14px;
+    }
+
+    .flow-step span {
+      font-size: 12px;
+      color: #47627f;
+      line-height: 1.4;
+    }
+
+    .flow-arrow {
+      color: var(--brand);
+      font-size: 20px;
+      margin-top: -18px;
+    }
+
+    .agent-core {
+      position: relative;
+      padding: 22px;
+      background:
+        radial-gradient(circle at top right, rgba(96, 201, 255, 0.12), transparent 32%),
+        linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+      box-shadow: inset 0 0 0 1px rgba(63, 115, 255, 0.06);
+    }
+
+    .core-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .core-title {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -0.04em;
+    }
+
+    .core-note {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 14px;
+      max-width: 60ch;
+    }
+
+    .core-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .core-card {
+      position: relative;
+      padding: 18px 16px 16px;
+      border-radius: 20px;
+      background: white;
+      border: 1px solid var(--line);
+      min-height: 190px;
+    }
+
+    .core-card .index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .core-card.plan .index { background: linear-gradient(135deg, var(--brand), #6591ff); }
+    .core-card.exec .index { background: linear-gradient(135deg, var(--cyan), #54b8ff); }
+    .core-card.check .index { background: linear-gradient(135deg, var(--green), #36c28b); }
+    .core-card.reflect .index { background: linear-gradient(135deg, var(--purple), #8c7bff); }
+
+    .core-card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .core-card p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .mini-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .mini-tags span {
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #f6f9fe;
+      color: #4a6480;
+      border: 1px solid var(--line);
+    }
+
+    .base-wrap {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .base {
+      padding: 18px;
+    }
+
+    .base-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .base h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .tone-data { color: var(--brand); background: var(--brand-soft); }
+    .tone-tool { color: var(--green); background: rgba(31,169,113,0.1); }
+    .tone-trust { color: var(--amber); background: rgba(245,165,36,0.12); }
+
+    .base p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .base ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #48617e;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .output-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .output-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--brand), var(--cyan));
+    }
+
+    .output-card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      padding-left: 8px;
+    }
+
+    .output-card p {
+      margin: 0 0 12px;
+      padding-left: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .result-item {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      background: #f8fbff;
+      border: 1px solid var(--line);
+    }
+
+    .result-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .result-item span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .footer {
+      margin-top: 16px;
+      padding: 18px 22px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .footer h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .footer p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    .talk-track {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .talk-track span {
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(63, 115, 255, 0.08);
+      color: #3558ac;
+      border: 1px solid rgba(63, 115, 255, 0.12);
+      font-size: 12px;
+    }
+
+    .engine-board {
+      display: grid;
+      gap: 16px;
+    }
+
+    .engine-strip {
+      display: grid;
+      grid-template-columns: 180px repeat(4, minmax(0, 1fr)) 180px;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .strip-node {
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+      border: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .strip-node strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .strip-node span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .engine-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stage-card {
+      padding: 18px;
+      border-radius: 22px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      min-height: 100%;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .stage-topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .stage-id {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .stage-card.plan .stage-id { background: linear-gradient(135deg, var(--brand), #6591ff); }
+    .stage-card.exec .stage-id { background: linear-gradient(135deg, var(--cyan), #54b8ff); }
+    .stage-card.check .stage-id { background: linear-gradient(135deg, var(--green), #36c28b); }
+    .stage-card.reflect .stage-id { background: linear-gradient(135deg, var(--purple), #8c7bff); }
+
+    .stage-card h3 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -0.03em;
+    }
+
+    .stage-purpose {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .stage-section {
+      padding: 12px;
+      border-radius: 16px;
+      background: #f8fbff;
+      border: 1px solid var(--line);
+    }
+
+    .stage-section strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+      color: #395374;
+    }
+
+    .stage-section ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    .handoff-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .handoff {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(63,115,255,0.05), rgba(255,255,255,0.98));
+      text-align: center;
+    }
+
+    .handoff strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .handoff span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .knowledge-board {
+      display: grid;
+      gap: 16px;
+    }
+
+    .knowledge-top {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+    }
+
+    .knowledge-card {
+      padding: 20px;
+      border-radius: 24px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+
+    .knowledge-card h3 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      letter-spacing: -0.03em;
+    }
+
+    .knowledge-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .knowledge-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .knowledge-metric {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #f8fbff;
+    }
+
+    .knowledge-metric strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 24px;
+      letter-spacing: -0.04em;
+    }
+
+    .knowledge-metric span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .stack-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .stack-card {
+      padding: 18px;
+      border-radius: 22px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+
+    .stack-card h4 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .stack-card p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    .stack-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #49637f;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .toolflow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .tool-node {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+      text-align: center;
+    }
+
+    .tool-node strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .tool-node span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .scope-note {
+      padding: 16px 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(245,165,36,0.18);
+      background: rgba(245,165,36,0.08);
+      color: #775e2f;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .trust-board {
+      display: grid;
+      gap: 16px;
+    }
+
+    .trust-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .trust-card {
+      padding: 18px;
+      border-radius: 22px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+
+    .trust-card h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .trust-card p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    .trust-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #49637f;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .checkpoint-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .checkpoint {
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+    }
+
+    .checkpoint strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .checkpoint span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .riskflow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .risk-node {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(245,165,36,0.05), rgba(255,255,255,0.98));
+      text-align: center;
+    }
+
+    .risk-node strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .risk-node span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .delivery-board {
+      display: grid;
+      gap: 16px;
+    }
+
+    .delivery-top {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 16px;
+    }
+
+    .delivery-card {
+      padding: 20px;
+      border-radius: 24px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+
+    .delivery-card h3 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      letter-spacing: -0.03em;
+    }
+
+    .delivery-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .report-card {
+      padding: 16px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+      border: 1px solid var(--line);
+    }
+
+    .report-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .report-card span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .interaction-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .interaction-card {
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(63,115,255,0.05), rgba(255,255,255,0.98));
+    }
+
+    .interaction-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .interaction-card span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .linkage-flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .linkage-node {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(96,201,255,0.06), rgba(255,255,255,0.98));
+      text-align: center;
+    }
+
+    .linkage-node strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .linkage-node span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    @media (max-width: 1260px) {
+      .grid { grid-template-columns: 280px 1fr; }
+      .right-col { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); display: grid; }
+    }
+
+    @media (max-width: 980px) {
+      .header, .footer, .grid, .base-wrap, .core-grid, .right-col, .engine-grid, .handoff-grid, .stack-grid, .toolflow, .knowledge-metrics, .trust-top, .checkpoint-grid, .riskflow, .report-grid, .interaction-grid, .linkage-flow {
+        grid-template-columns: 1fr;
+      }
+      .header { display: grid; }
+      .tabs { justify-content: flex-start; }
+      .flow-bar { display: grid; grid-template-columns: 1fr 24px 1fr 24px 1fr 24px 1fr; }
+      .engine-strip { grid-template-columns: 1fr; }
+      .knowledge-top, .delivery-top { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .page { width: min(100vw - 14px, 100%); margin-top: 10px; }
+      .header, .canvas, .footer { padding-left: 16px; padding-right: 16px; border-radius: 22px; }
+      .canvas { padding-top: 18px; padding-bottom: 18px; }
+      .flow-bar { grid-template-columns: 1fr; }
+      .flow-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="header">
+      <div>
+        <div class="eyebrow">Tab 1 · 系统架构总览</div>
+        <h1>高考志愿报告 Agent 端到端系统架构</h1>
+        <p>
+          这一页只讲整条系统链路：用户如何进入系统，Agent 如何推进任务，底层依赖什么数据与工具，
+          最后如何输出完整志愿报告并联动后续产品能力。它对应 PRD 的全局结构，而不是单个页面流程。
+        </p>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-tab="tab-1">Tab 1 总览</button>
+        <button class="tab" data-tab="tab-2">Tab 2 Agent 决策引擎</button>
+        <button class="tab" data-tab="tab-3">Tab 3 知识库与工具</button>
+        <button class="tab" data-tab="tab-4">Tab 4 可信校验</button>
+        <button class="tab" data-tab="tab-5">Tab 5 报告交付</button>
+      </div>
+    </section>
+
+    <section class="tab-panel active" id="tab-1">
+    <section class="canvas">
+      <div class="legend">
+        <span>用户输入</span>
+        <span>Agent 决策中心</span>
+        <span>知识与工具底座</span>
+        <span>可信校验机制</span>
+        <span>报告输出与产品联动</span>
+      </div>
+
+      <div class="grid">
+        <div class="column">
+          <article class="block">
+            <div class="block-head">
+              <h2 class="block-title">考生信息采集模块</h2>
+              <span class="badge">Input</span>
+            </div>
+            <p class="block-note">
+              对应 PRD 的完整输入层：12 个核心信息点采集、分步引导、冲突提醒、档案保存编辑，共同构成进入 Agent 的结构化考生档案。
+            </p>
+            <div class="chips">
+              <span class="chip">基础信息</span>
+              <span class="chip">成绩与位次</span>
+              <span class="chip">选考科目</span>
+              <span class="chip">院校偏好</span>
+              <span class="chip">专业兴趣</span>
+              <span class="chip">地域倾向</span>
+              <span class="chip">升学与就业意向</span>
+              <span class="chip">风险接受度</span>
+              <span class="chip">调剂意愿</span>
+              <span class="chip">身体条件限制</span>
+              <span class="chip">特殊政策资格</span>
+              <span class="chip">分步引导填写</span>
+              <span class="chip">模糊输入联想</span>
+              <span class="chip">即时冲突提醒</span>
+              <span class="chip">档案保存与编辑</span>
+              <span class="chip">变更后重新计算</span>
+            </div>
+          </article>
+
+          <div class="arrow-col">→</div>
+        </div>
+
+        <div class="center-stack">
+          <div class="flow-bar">
+            <div class="flow-step">
+              <strong>1</strong>
+              <span>考生信息<br />采集建档</span>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <strong>2</strong>
+              <span>Agent 决策<br />推进任务</span>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <strong>3</strong>
+              <span>知识与工具<br />提供支撑</span>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <strong>4</strong>
+              <span>完整报告<br />生成交付</span>
+            </div>
+          </div>
+
+          <section class="agent-core">
+            <div class="core-head">
+              <div>
+                <h2 class="core-title">Agent 决策引擎</h2>
+                <p class="core-note">
+                  对应 PRD 中最核心的链路：`任务规划 → 执行 → 检查 → 反思`。
+                  这是整个系统的中枢，不是单纯的大模型对话，而是模拟资深志愿规划师的决策流程。
+                </p>
+              </div>
+              <span class="badge">Core Engine</span>
+            </div>
+
+            <article class="block" style="margin-bottom:16px; background:linear-gradient(135deg, rgba(63,115,255,0.08), rgba(96,201,255,0.08));">
+              <div class="block-head">
+                <h2 class="block-title">高考志愿大模型</h2>
+                <span class="badge">Model</span>
+              </div>
+              <p class="block-note">
+                以通义千问为底座，通过指令微调、推理增强型强化学习和人类偏好强化学习，提供需求理解、推理生成与报告表达能力。
+              </p>
+              <div class="chips">
+                <span class="chip">需求理解准确率 ≥95%</span>
+                <span class="chip">5-10 分钟生成报告</span>
+                <span class="chip">核心数据幻觉率趋近于 0</span>
+              </div>
+            </article>
+
+            <div class="core-grid">
+              <article class="core-card plan">
+                <span class="index">01</span>
+                <h3>任务规划</h3>
+                <p>拆解成绩水位定位、需求优先级排序、院校专业初筛范围、风险点识别。</p>
+                <div class="mini-tags">
+                  <span>定位区间</span>
+                  <span>排序权重</span>
+                  <span>识别冲突</span>
+                </div>
+              </article>
+              <article class="core-card exec">
+                <span class="index">02</span>
+                <h3>执行</h3>
+                <p>联动知识库和工具链，拉取分数线、课程体系、就业去向、城市产业等信息生成方案。</p>
+                <div class="mini-tags">
+                  <span>知识调用</span>
+                  <span>方案生成</span>
+                  <span>冲稳保分层</span>
+                </div>
+              </article>
+              <article class="core-card check">
+                <span class="index">03</span>
+                <h3>检查</h3>
+                <p>进行多源数据比对、专业限制校验、梯度合理性检查，降低事实错误与逻辑错误。</p>
+                <div class="mini-tags">
+                  <span>数据校验</span>
+                  <span>逻辑校验</span>
+                  <span>风险暴露</span>
+                </div>
+              </article>
+              <article class="core-card reflect">
+                <span class="index">04</span>
+                <h3>反思</h3>
+                <p>针对高风险项、优质选项不足、需求满足不充分等问题补充替代方案与折中选项。</p>
+                <div class="mini-tags">
+                  <span>扩展搜索</span>
+                  <span>补备选方案</span>
+                  <span>解释取舍</span>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <div class="base-wrap">
+            <article class="base">
+              <div class="base-top">
+                <h3>知识库底座</h3>
+                <span class="badge tone-data">Data</span>
+              </div>
+              <p>对应 PRD 的高考知识库，是系统能不能输出权威、完整、可落地建议的前提。</p>
+              <ul>
+                <li>考试院 / 教育部 / 高校官网数据</li>
+                <li>2900+ 高校与 1600+ 本科专业</li>
+                <li>就业报告、城市产业、政策信息</li>
+              </ul>
+            </article>
+            <article class="base">
+              <div class="base-top">
+                <h3>工具与检索层</h3>
+                <span class="badge tone-tool">Tools</span>
+              </div>
+              <p>负责把 Agent 的决策意图翻译成可执行动作，避免模型直接编造数字、排序和约束结果。</p>
+              <ul>
+                <li>知识库调用与结构化检索</li>
+                <li>规则引擎与专业限制过滤</li>
+                <li>冲稳保计算与候选排序</li>
+              </ul>
+            </article>
+            <article class="base">
+              <div class="base-top">
+                <h3>数据治理与可信校验</h3>
+                <span class="badge tone-trust">Trust</span>
+              </div>
+              <p>这一层承接 PRD 的数据治理机制与检查阶段，决定系统是否适合高风险决策场景。</p>
+              <ul>
+                <li>多源交叉比对</li>
+                <li>OCR + 人工校验</li>
+                <li>分级采信与 24 小时更新</li>
+                <li>专业限制 / 梯度 / 风险检查</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+
+        <div class="column right-col">
+          <article class="output-card">
+            <h3>报告输出与交互</h3>
+            <p>对应 PRD 中“报告输出与交互”。最终交付物不是一句答案，而是一份 15-20 页完整志愿报告及其后续联动能力。</p>
+            <div class="result-item">
+              <strong>完整报告生成</strong>
+              <span>考生分析、冲稳保策略、志愿清单、风险提示、备选方案</span>
+            </div>
+            <div class="result-item">
+              <strong>报告预览与 PDF 下载</strong>
+              <span>支持在线分页预览，适配手机、PC 与打印场景</span>
+            </div>
+            <div class="result-item">
+              <strong>重点标注</strong>
+              <span>自动高亮风险项、高适配专业、就业优势院校</span>
+            </div>
+            <div class="result-item">
+              <strong>产品联动输出</strong>
+              <span>同步到智能选志愿，并与高考深度搜索形成后续决策闭环</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="footer">
+      <div>
+        <h3>这一页怎么讲</h3>
+        <p>
+          从左往右讲：先是用户输入与交互机制，再进入中间的 Agent 决策中枢，接着补一句“它不是凭空推理，底层踩在知识库、工具和可信校验上”，最后落到右侧报告输出与产品联动。
+          这样面试官会先理解系统全貌，后面再看单独 tab 展开细节会更顺。
+        </p>
+      </div>
+      <div class="talk-track">
+        <span>先讲产品链路</span>
+        <span>再讲 Agent 中枢</span>
+        <span>再讲数据与工具</span>
+        <span>最后讲输出价值</span>
+      </div>
+    </section>
+    </section>
+
+    <section class="tab-panel" id="tab-2">
+      <section class="canvas">
+        <div class="legend">
+          <span>输入：结构化考生档案</span>
+          <span>核心：规划 → 执行 → 检查 → 反思</span>
+          <span>阶段产物：任务计划 / 候选清单 / 校验结果 / 最终方案</span>
+        </div>
+
+        <div class="engine-board">
+          <div class="engine-strip">
+            <div class="strip-node">
+              <strong>输入</strong>
+              <span>考生档案 JSON<br />12 个信息点结构化入模</span>
+            </div>
+            <div class="strip-node">
+              <strong>任务规划</strong>
+              <span>拆问题、定优先级、识别风险</span>
+            </div>
+            <div class="strip-node">
+              <strong>执行</strong>
+              <span>调用知识库与工具生成候选方案</span>
+            </div>
+            <div class="strip-node">
+              <strong>检查</strong>
+              <span>做数据与逻辑双重校验</span>
+            </div>
+            <div class="strip-node">
+              <strong>反思</strong>
+              <span>补充替代方案与折中建议</span>
+            </div>
+            <div class="strip-node">
+              <strong>输出</strong>
+              <span>可交付的志愿报告结构</span>
+            </div>
+          </div>
+
+          <div class="engine-grid">
+            <article class="stage-card plan">
+              <div class="stage-topline">
+                <div class="stage-id">01</div>
+                <span class="badge">Planning</span>
+              </div>
+              <h3>任务规划</h3>
+              <p class="stage-purpose">把用户输入的复杂诉求拆成可执行决策任务，明确这次报告到底要先解决什么问题。</p>
+              <div class="stage-section">
+                <strong>阶段输入</strong>
+                <ul>
+                  <li>成绩、位次、选科、省份等硬条件</li>
+                  <li>院校、专业、地域、就业等偏好</li>
+                  <li>调剂意愿、风险偏好、特殊限制</li>
+                </ul>
+              </div>
+              <div class="stage-section">
+                <strong>阶段动作</strong>
+                <ul>
+                  <li>成绩水位定位</li>
+                  <li>需求优先级排序</li>
+                  <li>初筛院校专业范围</li>
+                  <li>识别潜在冲突与高风险点</li>
+                </ul>
+              </div>
+              <div class="stage-section">
+                <strong>阶段输出</strong>
+                <ul>
+                  <li>任务列表</li>
+                  <li>优先级权重</li>
+                  <li>风险与澄清点</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="stage-card exec">
+              <div class="stage-topline">
+                <div class="stage-id">02</div>
+                <span class="badge">Execution</span>
+              </div>
+              <h3>执行</h3>
+              <p class="stage-purpose">按规划结果调用知识库与工具，把候选院校、专业、录取概率和解释材料真正算出来、查出来。</p>
+              <div class="stage-section">
+                <strong>阶段输入</strong>
+                <ul>
+                  <li>任务计划与优先级</li>
+                  <li>考生画像与约束条件</li>
+                  <li>待调用的数据查询意图</li>
+                </ul>
+              </div>
+              <div class="stage-section">
+                <strong>阶段动作</strong>
+                <ul>
+                  <li>知识库调用</li>
+                  <li>结构化检索与规则过滤</li>
+                  <li>冲稳保清单生成</li>
+                  <li>就业与城市适配分析</li>
+                </ul>
+              </div>
+              <div class="stage-section">
+                <strong>阶段输出</strong>
+                <ul>
+                  <li>候选志愿清单</li>
+                  <li>院校专业解读材料</li>
+                  <li>基础报告草案</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="stage-card check">
+              <div class="stage-topline">
+                <div class="stage-id">03</div>
+                <span class="badge">Check</span>
+              </div>
+              <h3>检查</h3>
+              <p class="stage-purpose">对执行阶段得到的结果做双重校验，确保系统输出在事实和逻辑上都站得住脚。</p>
+              <div class="stage-section">
+                <strong>阶段输入</strong>
+                <ul>
+                  <li>候选志愿与排序结果</li>
+                  <li>分数线、规则、限制条件</li>
+                  <li>报告中的核心判断依据</li>
+                </ul>
+              </div>
+              <div class="stage-section">
+                <strong>阶段动作</strong>
+                <ul>
+                  <li>多源数据校验</li>
+                  <li>选科与身体条件校验</li>
+                  <li>冲稳保梯度合理性检查</li>
+                  <li>风险项识别与标注</li>
+                </ul>
+              </div>
+              <div class="stage-section">
+                <strong>阶段输出</strong>
+                <ul>
+                  <li>通过校验的候选方案</li>
+                  <li>风险清单</li>
+                  <li>需修正的问题列表</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="stage-card reflect">
+              <div class="stage-topline">
+                <div class="stage-id">04</div>
+                <span class="badge">Reflect</span>
+              </div>
+              <h3>反思</h3>
+              <p class="stage-purpose">当系统发现“优质选项不足”或“需求未充分满足”时，不停留在报错，而是主动补方案和解释取舍。</p>
+              <div class="stage-section">
+                <strong>阶段输入</strong>
+                <ul>
+                  <li>检查阶段暴露出的风险</li>
+                  <li>需求满足度不足项</li>
+                  <li>当前方案的缺口与短板</li>
+                </ul>
+              </div>
+              <div class="stage-section">
+                <strong>阶段动作</strong>
+                <ul>
+                  <li>扩展搜索范围</li>
+                  <li>补替代志愿表</li>
+                  <li>输出折中方案与解释</li>
+                  <li>形成最终报告结构</li>
+                </ul>
+              </div>
+              <div class="stage-section">
+                <strong>阶段输出</strong>
+                <ul>
+                  <li>最终推荐方案</li>
+                  <li>备选方案</li>
+                  <li>风险应对建议</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+
+          <div class="handoff-grid">
+            <div class="handoff">
+              <strong>阶段产物 1</strong>
+              <span>结构化考生档案</span>
+            </div>
+            <div class="handoff">
+              <strong>阶段产物 2</strong>
+              <span>任务计划与优先级</span>
+            </div>
+            <div class="handoff">
+              <strong>阶段产物 3</strong>
+              <span>候选志愿与报告草案</span>
+            </div>
+            <div class="handoff">
+              <strong>阶段产物 4</strong>
+              <span>校验结果与风险清单</span>
+            </div>
+            <div class="handoff">
+              <strong>阶段产物 5</strong>
+              <span>最终报告包与备选方案</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="footer">
+        <div>
+          <h3>这一页怎么讲</h3>
+          <p>
+            这一页只讲 Agent 自己怎么运转。先从“输入的是结构化考生档案”切入，再依次解释规划、执行、检查、反思四个阶段分别负责什么，
+            最后用底部的阶段产物告诉面试官：这不是一次性生成，而是一条有中间状态、有校验节点的决策工作流。
+          </p>
+        </div>
+        <div class="talk-track">
+          <span>输入先结构化</span>
+          <span>规划决定方向</span>
+          <span>执行负责查与算</span>
+          <span>检查保证可信</span>
+          <span>反思补足方案</span>
+        </div>
+      </section>
+    </section>
+
+    <section class="tab-panel" id="tab-3">
+      <section class="canvas">
+        <div class="legend">
+          <span>目标：让 Agent 有数据可查、有工具可调、有边界可控</span>
+          <span>边界：不展开校验细节，不展开报告交付</span>
+        </div>
+
+        <div class="knowledge-board">
+          <div class="knowledge-top">
+            <article class="knowledge-card">
+              <h3>高考知识库是 Agent 的事实底座</h3>
+              <p>
+                这一页对应 PRD 的“高考知识库搭建”和技术架构中的数据层、检索层。它回答的是：
+                Agent 做决策时，事实从哪里来，查询如何发生，为什么它不是单纯靠模型记忆在回答问题。
+              </p>
+              <div class="knowledge-metrics">
+                <div class="knowledge-metric">
+                  <strong>2900+</strong>
+                  <span>高校核心信息</span>
+                </div>
+                <div class="knowledge-metric">
+                  <strong>1600+</strong>
+                  <span>本科专业信息</span>
+                </div>
+                <div class="knowledge-metric">
+                  <strong>8000+</strong>
+                  <span>权威站点与网页来源</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="knowledge-card">
+              <h3>与模型的关系</h3>
+              <p>
+                大模型负责理解需求、组织推理和生成表达；知识库与工具层负责提供确定性事实、检索结果和计算结果。
+                也就是说，模型是“大脑”，但不是“数据库”。
+              </p>
+            </article>
+          </div>
+
+          <div class="stack-grid">
+            <article class="stack-card">
+              <h4>知识库层</h4>
+              <p>沉淀高考场景里的核心数据资产，支持 Agent 在不同决策任务里调取同一套权威底座。</p>
+              <ul>
+                <li>考试院、教育部、省招办、高校官网</li>
+                <li>院校基础信息、专业设置、历年分数线</li>
+                <li>就业质量报告、城市产业与政策信息</li>
+              </ul>
+            </article>
+
+            <article class="stack-card">
+              <h4>工具与检索层</h4>
+              <p>把 Agent 的自然语言意图转成可执行动作，完成查数、过滤、计算和排序。</p>
+              <ul>
+                <li>知识库调用与结构化检索</li>
+                <li>规则过滤与约束匹配</li>
+                <li>冲稳保计算与候选排序</li>
+              </ul>
+            </article>
+
+            <article class="stack-card">
+              <h4>模型依赖层</h4>
+              <p>模型并不替代知识库或工具，而是负责调度它们，把结果组织成完整决策链条。</p>
+              <ul>
+                <li>需求理解与任务拆解</li>
+                <li>调用工具获取事实</li>
+                <li>基于结果生成解释与建议</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="toolflow">
+            <div class="tool-node">
+              <strong>用户问题</strong>
+              <span>例如：山东物化生 612 分，适合哪些计算机方向志愿？</span>
+            </div>
+            <div class="tool-node">
+              <strong>Agent 发起调用</strong>
+              <span>把需求拆成分数、选科、偏好、策略等查询条件</span>
+            </div>
+            <div class="tool-node">
+              <strong>知识库与检索返回</strong>
+              <span>拉回院校、专业、分数线、限制条件等结构化结果</span>
+            </div>
+            <div class="tool-node">
+              <strong>工具计算</strong>
+              <span>做过滤、冲稳保打标、候选排序与适配分析</span>
+            </div>
+            <div class="tool-node">
+              <strong>回给 Agent</strong>
+              <span>把确定性结果交回 Agent 进入后续决策与表达</span>
+            </div>
+          </div>
+
+          <div class="scope-note">
+            这一页刻意不展开“多源校验、OCR+人工校验、分级采信、风险提示”这些内容，因为它们属于 `Tab 4｜可信校验`；
+            也不展开“报告预览、PDF 下载、重点标注”等交付能力，因为它们属于 `Tab 5｜报告交付`。
+          </div>
+        </div>
+      </section>
+
+      <section class="footer">
+        <div>
+          <h3>这一页怎么讲</h3>
+          <p>
+            先讲一句核心原则：“模型不是数据库”。然后依次讲知识库层沉淀什么事实、工具层解决什么动作、模型层负责什么组织，
+            最后用底部的调用链说明 Agent 为什么能查得准、算得动、讲得通。
+          </p>
+        </div>
+        <div class="talk-track">
+          <span>模型不是数据库</span>
+          <span>知识库提供事实</span>
+          <span>工具层负责查与算</span>
+          <span>模型负责调度与表达</span>
+        </div>
+      </section>
+    </section>
+
+    <section class="tab-panel" id="tab-4">
+      <section class="canvas">
+        <div class="legend">
+          <span>目标：把系统从“能回答”提升到“可用于高风险决策”</span>
+          <span>拆分：数据治理机制 / 运行时校验 / 风险暴露与回流</span>
+        </div>
+
+        <div class="trust-board">
+          <div class="trust-top">
+            <article class="trust-card">
+              <h3>数据治理机制</h3>
+              <p>这是系统上线前的长期底座治理，确保进入 Agent 的事实本身尽量可靠、及时、可审计。</p>
+              <ul>
+                <li>多源交叉比对</li>
+                <li>OCR + 人工抽检校验</li>
+                <li>分级采信策略</li>
+                <li>政策与院校信息定时更新</li>
+              </ul>
+            </article>
+
+            <article class="trust-card">
+              <h3>运行时校验</h3>
+              <p>这是执行过程中对具体方案做的即时检查，避免把“看起来合理”的错误答案交付给用户。</p>
+              <ul>
+                <li>分数线与关键数字核验</li>
+                <li>选科 / 身体条件 / 调剂限制校验</li>
+                <li>冲稳保梯度合理性检查</li>
+                <li>志愿排序逻辑检查</li>
+              </ul>
+            </article>
+
+            <article class="trust-card">
+              <h3>风险暴露与回流</h3>
+              <p>系统不仅要发现问题，还要把不确定性显式暴露出来，并把问题带回后续修正流程。</p>
+              <ul>
+                <li>高风险项标注</li>
+                <li>“仅供参考”与绝对化表述约束</li>
+                <li>替代方案补充</li>
+                <li>问题清单回流反思阶段</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="checkpoint-grid">
+            <div class="checkpoint">
+              <strong>Checkpoint 1</strong>
+              <span>关键数据先比对来源一致性，再进入候选方案计算。</span>
+            </div>
+            <div class="checkpoint">
+              <strong>Checkpoint 2</strong>
+              <span>候选志愿生成后，立刻检查选科、身体条件与调剂限制。</span>
+            </div>
+            <div class="checkpoint">
+              <strong>Checkpoint 3</strong>
+              <span>方案成型后检查冲稳保梯度，避免整体过冲或整体过保。</span>
+            </div>
+            <div class="checkpoint">
+              <strong>Checkpoint 4</strong>
+              <span>发现问题不直接输出，而是进入风险提示与补方案流程。</span>
+            </div>
+          </div>
+
+          <div class="riskflow">
+            <div class="risk-node">
+              <strong>发现异常</strong>
+              <span>数据冲突、规则不符、梯度异常或需求满足不足</span>
+            </div>
+            <div class="risk-node">
+              <strong>分类问题</strong>
+              <span>区分数据问题、逻辑问题、风险问题与信息缺失问题</span>
+            </div>
+            <div class="risk-node">
+              <strong>显式暴露</strong>
+              <span>在报告中标出高风险项与需要用户关注的边界条件</span>
+            </div>
+            <div class="risk-node">
+              <strong>补充方案</strong>
+              <span>给出替代志愿表、折中选项或扩展搜索结果</span>
+            </div>
+            <div class="risk-node">
+              <strong>问题回流</strong>
+              <span>把异常与修正建议回流到反思与后续迭代环节</span>
+            </div>
+          </div>
+
+          <div class="scope-note">
+            这一页不再展开“知识库里有哪些数据、工具怎么查怎么算”，那些属于 `Tab 3｜知识库与工具`；
+            也不展开“报告预览、PDF 下载、重点标注、一键同步”等交付能力，那些属于 `Tab 5｜报告交付`。
+          </div>
+        </div>
+      </section>
+
+      <section class="footer">
+        <div>
+          <h3>这一页怎么讲</h3>
+          <p>
+            先讲一句核心判断：“高考志愿是高风险决策，所以系统必须先可信再智能。”然后顺着三层往下讲：
+            上线前靠数据治理打底，运行时靠校验机制兜底，输出前靠风险暴露和补方案把不确定性讲清楚。
+          </p>
+        </div>
+        <div class="talk-track">
+          <span>先治理数据</span>
+          <span>再校验结果</span>
+          <span>再暴露风险</span>
+          <span>最后问题回流</span>
+        </div>
+      </section>
+    </section>
+
+    <section class="tab-panel" id="tab-5">
+      <section class="canvas">
+        <div class="legend">
+          <span>目标：把系统结果变成用户可消费、可操作、可继续流转的产品交付</span>
+          <span>拆分：报告内容结构 / 交互能力 / 产品联动</span>
+        </div>
+
+        <div class="delivery-board">
+          <div class="delivery-top">
+            <article class="delivery-card">
+              <h3>最终交付物不是一句答案，而是一份完整报告</h3>
+              <p>
+                这一页对应 PRD 的“报告核心内容”和“报告输出与交互”。系统最终交付的是 15-20 页完整志愿报告，
+                既能帮助用户快速看结论，也能支持家长、学生和后续产品模块继续消费这份结果。
+              </p>
+            </article>
+            <article class="delivery-card">
+              <h3>报告的产品价值</h3>
+              <p>
+                它不是单点推荐结果，而是一个兼顾“决策解释”“风险提示”“后续操作”的载体，
+                让用户从“知道答案”真正走到“敢做决定”。
+              </p>
+            </article>
+          </div>
+
+          <div class="report-grid">
+            <div class="report-card">
+              <strong>考生情况深度分析</strong>
+              <span>成绩位次解读、需求优先级梳理、适配方向总结</span>
+            </div>
+            <div class="report-card">
+              <strong>填报策略总览</strong>
+              <span>冲稳保分配逻辑、核心决策依据、风险控制方案</span>
+            </div>
+            <div class="report-card">
+              <strong>志愿清单及解读</strong>
+              <span>院校专业、录取概率、核心优势、限制条件</span>
+            </div>
+            <div class="report-card">
+              <strong>风险提示与应对</strong>
+              <span>调剂风险、退档风险、专业适配风险及规避建议</span>
+            </div>
+            <div class="report-card">
+              <strong>备选方案</strong>
+              <span>针对核心需求提供 1-2 套替代志愿表</span>
+            </div>
+          </div>
+
+          <div class="interaction-grid">
+            <div class="interaction-card">
+              <strong>在线分页预览</strong>
+              <span>支持用户先快速浏览重点内容，再深入阅读完整报告。</span>
+            </div>
+            <div class="interaction-card">
+              <strong>PDF 下载</strong>
+              <span>适配手机、PC 和打印机排版，满足家长场景的留存与分享需求。</span>
+            </div>
+            <div class="interaction-card">
+              <strong>重点标注</strong>
+              <span>自动高亮风险项、高适配专业、就业优势院校，减少阅读成本。</span>
+            </div>
+            <div class="interaction-card">
+              <strong>手动标记重点</strong>
+              <span>用户可以在报告中进一步确认关注院校和待讨论项。</span>
+            </div>
+          </div>
+
+          <div class="linkage-flow">
+            <div class="linkage-node">
+              <strong>报告生成完成</strong>
+              <span>系统将策略、清单和风险提示组装为完整报告</span>
+            </div>
+            <div class="linkage-node">
+              <strong>用户先看摘要</strong>
+              <span>快速理解核心结论与高风险项</span>
+            </div>
+            <div class="linkage-node">
+              <strong>进入完整报告</strong>
+              <span>查看详细解读、备选方案与重点标注</span>
+            </div>
+            <div class="linkage-node">
+              <strong>下载或保存</strong>
+              <span>进入家长讨论、线下决策与留存场景</span>
+            </div>
+            <div class="linkage-node">
+              <strong>同步后续产品</strong>
+              <span>一键进入智能选志愿或结合高考深度搜索继续追问</span>
+            </div>
+          </div>
+
+          <div class="scope-note">
+            这一页不再展开“Agent 如何做规划执行检查反思”，那些属于 `Tab 2｜Agent 决策引擎`；
+            也不再展开“知识库怎么查数、校验怎么兜底”，那些分别属于 `Tab 3` 和 `Tab 4`。
+          </div>
+        </div>
+      </section>
+
+      <section class="footer">
+        <div>
+          <h3>这一页怎么讲</h3>
+          <p>
+            先讲交付物定义：系统最终不是回一句话，而是生成一份完整报告。然后顺着“报告内容结构 → 交互能力 → 产品联动”三层讲下去，
+            最后落一句：这份报告既是结果，也是后续决策链路的起点。
+          </p>
+        </div>
+        <div class="talk-track">
+          <span>先讲交付物</span>
+          <span>再讲内容结构</span>
+          <span>再讲预览与下载</span>
+          <span>最后讲产品联动</span>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script>
+    const tabs = document.querySelectorAll("[data-tab]");
+    const panels = document.querySelectorAll(".tab-panel");
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const target = tab.dataset.tab;
+        tabs.forEach((item) => item.classList.toggle("active", item === tab));
+        panels.forEach((panel) => panel.classList.toggle("active", panel.id === target));
+      });
+    });
+  </script>
+</body>
+</html>
