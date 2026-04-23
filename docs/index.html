@@ -34,11 +34,26 @@
         radial-gradient(circle at 95% 0%, rgba(63, 115, 255, 0.16), transparent 20%),
         linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
       font-family: "PingFang SC", "SF Pro Display", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(420px circle at var(--cursor-x, 50%) var(--cursor-y, 20%), rgba(96, 201, 255, 0.2), transparent 42%),
+        linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.38) 44%, transparent 52%);
+      opacity: 0.85;
+      z-index: 0;
     }
 
     .page {
       width: min(1440px, calc(100vw - 28px));
       margin: 18px auto 28px;
+      position: relative;
+      z-index: 1;
     }
 
     .header,
@@ -124,6 +139,12 @@
 
     .tab-panel.active {
       display: block;
+      animation: panelSlide 420ms cubic-bezier(.2,.8,.2,1);
+    }
+
+    @keyframes panelSlide {
+      from { opacity: 0; transform: translateY(18px) scale(0.99); filter: blur(4px); }
+      to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
     }
 
     .canvas {
@@ -461,6 +482,10 @@
       grid-template-columns: 1.1fr 0.9fr;
       gap: 16px;
       align-items: center;
+    }
+
+    .footer {
+      display: none;
     }
 
     .footer h3 {
@@ -953,13 +978,377 @@
       line-height: 1.65;
     }
 
+    .block,
+    .core-card,
+    .base,
+    .output-card,
+    .stage-card,
+    .strip-node,
+    .handoff,
+    .knowledge-card,
+    .knowledge-metric,
+    .stack-card,
+    .tool-node,
+    .trust-card,
+    .checkpoint,
+    .risk-node,
+    .delivery-card,
+    .report-card,
+    .interaction-card,
+    .linkage-node {
+      transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, background 220ms ease;
+    }
+
+    .interactive-card {
+      cursor: pointer;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .interactive-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(63, 115, 255, 0.32);
+      box-shadow: 0 18px 45px rgba(63, 115, 255, 0.16);
+    }
+
+    .interactive-card.selected {
+      border-color: rgba(63, 115, 255, 0.72);
+      box-shadow: 0 22px 56px rgba(63, 115, 255, 0.22), inset 0 0 0 1px rgba(63, 115, 255, 0.18);
+      background: linear-gradient(180deg, #ffffff 0%, #f4f8ff 100%);
+    }
+
+    .interactive-card.selected::after {
+      content: "已聚焦";
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--cyan));
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 520ms ease, transform 520ms ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .insight-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      width: min(680px, calc(100vw - 28px));
+      transform: translate(-50%, 20px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 20;
+      padding: 14px 18px;
+      border-radius: 18px;
+      color: #173253;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(63, 115, 255, 0.18);
+      box-shadow: 0 24px 80px rgba(47, 81, 145, 0.18);
+      backdrop-filter: blur(20px);
+      transition: opacity 260ms ease, transform 260ms ease;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .insight-toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .product-shell {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr) 360px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .product-panel {
+      padding: 18px;
+      border-radius: 24px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 60px rgba(47, 81, 145, 0.08);
+    }
+
+    .product-panel h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      letter-spacing: -0.03em;
+    }
+
+    .product-panel p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    .form-row {
+      margin-top: 14px;
+      padding: 13px;
+      border-radius: 18px;
+      background: #f8fbff;
+      border: 1px solid var(--line);
+    }
+
+    .form-row label {
+      display: block;
+      margin-bottom: 9px;
+      color: #415b77;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .demo-input,
+    .demo-select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px 12px;
+      color: var(--text);
+      background: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .demo-input:focus,
+    .demo-select:focus {
+      border-color: rgba(63, 115, 255, 0.6);
+      box-shadow: 0 0 0 4px rgba(63, 115, 255, 0.1);
+    }
+
+    .toggle-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .choice {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #415b77;
+      padding: 8px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 180ms ease;
+    }
+
+    .choice.active,
+    .choice:hover {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--brand), #5b8bff);
+      box-shadow: 0 10px 22px rgba(63, 115, 255, 0.18);
+    }
+
+    .range-row {
+      display: grid;
+      grid-template-columns: 1fr 52px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .range-row input {
+      accent-color: var(--brand);
+    }
+
+    .range-value {
+      padding: 7px 9px;
+      text-align: center;
+      border-radius: 12px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .demo-cta {
+      width: 100%;
+      margin-top: 14px;
+      border: 0;
+      padding: 14px 16px;
+      border-radius: 18px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--cyan));
+      box-shadow: 0 18px 38px rgba(63, 115, 255, 0.26);
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .demo-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 48px rgba(63, 115, 255, 0.32);
+    }
+
+    .agent-console {
+      min-height: 620px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .agent-console::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, transparent 0%, rgba(96, 201, 255, 0.18) 48%, transparent 55%),
+        radial-gradient(circle at 88% 10%, rgba(63, 115, 255, 0.16), transparent 28%);
+      opacity: 0.7;
+    }
+
+    .agent-console > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .progress-rail {
+      margin-top: 16px;
+      height: 10px;
+      border-radius: 999px;
+      background: #edf3fb;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--brand), var(--cyan));
+      transition: width 650ms cubic-bezier(.2,.8,.2,1);
+    }
+
+    .agent-step-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .agent-step {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 10px;
+      padding: 13px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+      opacity: 0.56;
+      transform: translateX(-8px);
+      transition: all 260ms ease;
+    }
+
+    .agent-step.done,
+    .agent-step.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .agent-step.active {
+      border-color: rgba(63, 115, 255, 0.42);
+      box-shadow: 0 16px 36px rgba(63, 115, 255, 0.12);
+    }
+
+    .step-dot {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--cyan));
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .agent-step strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .agent-step span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .report-preview {
+      display: grid;
+      gap: 12px;
+    }
+
+    .score-card {
+      padding: 16px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(63, 115, 255, 0.1), rgba(96, 201, 255, 0.1));
+      border: 1px solid rgba(63, 115, 255, 0.16);
+    }
+
+    .score-card strong {
+      display: block;
+      font-size: 30px;
+      letter-spacing: -0.05em;
+      margin-bottom: 5px;
+    }
+
+    .school-result {
+      padding: 13px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #fff;
+      transition: transform 180ms ease, border-color 180ms ease;
+    }
+
+    .school-result:hover {
+      transform: translateX(4px);
+      border-color: rgba(63, 115, 255, 0.4);
+    }
+
+    .school-result strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .school-result span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .tier-tag {
+      display: inline-flex;
+      margin-bottom: 8px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--cyan));
+      font-size: 11px;
+      font-weight: 800;
+    }
+
     @media (max-width: 1260px) {
       .grid { grid-template-columns: 280px 1fr; }
       .right-col { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); display: grid; }
     }
 
     @media (max-width: 980px) {
-      .header, .footer, .grid, .base-wrap, .core-grid, .right-col, .engine-grid, .handoff-grid, .stack-grid, .toolflow, .knowledge-metrics, .trust-top, .checkpoint-grid, .riskflow, .report-grid, .interaction-grid, .linkage-flow {
+      .header, .footer, .grid, .base-wrap, .core-grid, .right-col, .engine-grid, .handoff-grid, .stack-grid, .toolflow, .knowledge-metrics, .trust-top, .checkpoint-grid, .riskflow, .report-grid, .interaction-grid, .linkage-flow, .product-shell {
         grid-template-columns: 1fr;
       }
       .header { display: grid; }
@@ -995,6 +1384,7 @@
         <button class="tab" data-tab="tab-3">Tab 3 知识库与工具</button>
         <button class="tab" data-tab="tab-4">Tab 4 可信校验</button>
         <button class="tab" data-tab="tab-5">Tab 5 报告交付</button>
+        <button class="tab" data-tab="tab-6">Tab 6 产品体验</button>
       </div>
     </section>
 
@@ -1199,24 +1589,7 @@
           </article>
         </div>
       </div>
-    </section>
-
-    <section class="footer">
-      <div>
-        <h3>这一页怎么讲</h3>
-        <p>
-          从左往右讲：先是用户输入与交互机制，再进入中间的 Agent 决策中枢，接着补一句“它不是凭空推理，底层踩在知识库、工具和可信校验上”，最后落到右侧报告输出与产品联动。
-          这样面试官会先理解系统全貌，后面再看单独 tab 展开细节会更顺。
-        </p>
-      </div>
-      <div class="talk-track">
-        <span>先讲产品链路</span>
-        <span>再讲 Agent 中枢</span>
-        <span>再讲数据与工具</span>
-        <span>最后讲输出价值</span>
-      </div>
-    </section>
-    </section>
+    </section>    </section>
 
     <section class="tab-panel" id="tab-2">
       <section class="canvas">
@@ -1415,25 +1788,7 @@
             </div>
           </div>
         </div>
-      </section>
-
-      <section class="footer">
-        <div>
-          <h3>这一页怎么讲</h3>
-          <p>
-            这一页只讲 Agent 自己怎么运转。先从“输入的是结构化考生档案”切入，再依次解释规划、执行、检查、反思四个阶段分别负责什么，
-            最后用底部的阶段产物告诉面试官：这不是一次性生成，而是一条有中间状态、有校验节点的决策工作流。
-          </p>
-        </div>
-        <div class="talk-track">
-          <span>输入先结构化</span>
-          <span>规划决定方向</span>
-          <span>执行负责查与算</span>
-          <span>检查保证可信</span>
-          <span>反思补足方案</span>
-        </div>
-      </section>
-    </section>
+      </section>    </section>
 
     <section class="tab-panel" id="tab-3">
       <section class="canvas">
@@ -1535,24 +1890,7 @@
             也不展开“报告预览、PDF 下载、重点标注”等交付能力，因为它们属于 `Tab 5｜报告交付`。
           </div>
         </div>
-      </section>
-
-      <section class="footer">
-        <div>
-          <h3>这一页怎么讲</h3>
-          <p>
-            先讲一句核心原则：“模型不是数据库”。然后依次讲知识库层沉淀什么事实、工具层解决什么动作、模型层负责什么组织，
-            最后用底部的调用链说明 Agent 为什么能查得准、算得动、讲得通。
-          </p>
-        </div>
-        <div class="talk-track">
-          <span>模型不是数据库</span>
-          <span>知识库提供事实</span>
-          <span>工具层负责查与算</span>
-          <span>模型负责调度与表达</span>
-        </div>
-      </section>
-    </section>
+      </section>    </section>
 
     <section class="tab-panel" id="tab-4">
       <section class="canvas">
@@ -1644,24 +1982,7 @@
             也不展开“报告预览、PDF 下载、重点标注、一键同步”等交付能力，那些属于 `Tab 5｜报告交付`。
           </div>
         </div>
-      </section>
-
-      <section class="footer">
-        <div>
-          <h3>这一页怎么讲</h3>
-          <p>
-            先讲一句核心判断：“高考志愿是高风险决策，所以系统必须先可信再智能。”然后顺着三层往下讲：
-            上线前靠数据治理打底，运行时靠校验机制兜底，输出前靠风险暴露和补方案把不确定性讲清楚。
-          </p>
-        </div>
-        <div class="talk-track">
-          <span>先治理数据</span>
-          <span>再校验结果</span>
-          <span>再暴露风险</span>
-          <span>最后问题回流</span>
-        </div>
-      </section>
-    </section>
+      </section>    </section>
 
     <section class="tab-panel" id="tab-5">
       <section class="canvas">
@@ -1758,21 +2079,141 @@
             也不再展开“知识库怎么查数、校验怎么兜底”，那些分别属于 `Tab 3` 和 `Tab 4`。
           </div>
         </div>
-      </section>
+      </section>    </section>
 
-      <section class="footer">
-        <div>
-          <h3>这一页怎么讲</h3>
-          <p>
-            先讲交付物定义：系统最终不是回一句话，而是生成一份完整报告。然后顺着“报告内容结构 → 交互能力 → 产品联动”三层讲下去，
-            最后落一句：这份报告既是结果，也是后续决策链路的起点。
-          </p>
+    <section class="tab-panel" id="tab-6">
+      <section class="canvas">
+        <div class="legend">
+          <span>可体验 Demo：输入考生档案 → Agent 生成 → 查看冲稳保摘要</span>
+          <span>所有数据均为虚构样例，用于面试展示交互和产品闭环</span>
         </div>
-        <div class="talk-track">
-          <span>先讲交付物</span>
-          <span>再讲内容结构</span>
-          <span>再讲预览与下载</span>
-          <span>最后讲产品联动</span>
+
+        <div class="product-shell">
+          <aside class="product-panel">
+            <h3>生成我的志愿报告</h3>
+            <p>模拟真实用户入口：补齐关键信息后，Agent 会生成一份可解释的志愿策略摘要。</p>
+
+            <div class="form-row">
+              <label for="province">省份与选科</label>
+              <select class="demo-select" id="province">
+                <option>山东 · 物化生</option>
+                <option>浙江 · 物化政</option>
+                <option>江苏 · 物化地</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="score">分数 / 位次</label>
+              <input class="demo-input" id="score" value="612 分 / 位次 14231" />
+            </div>
+
+            <div class="form-row">
+              <label>专业兴趣</label>
+              <div class="toggle-group" data-choice-group="major">
+                <button class="choice active" type="button">计算机</button>
+                <button class="choice" type="button">临床医学</button>
+                <button class="choice" type="button">法学</button>
+                <button class="choice" type="button">汉语言</button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label>地域倾向</label>
+              <div class="toggle-group" data-choice-group="city">
+                <button class="choice active" type="button">江浙沪</button>
+                <button class="choice" type="button">省内优先</button>
+                <button class="choice" type="button">新一线</button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label for="riskRange">风险偏好</label>
+              <div class="range-row">
+                <input id="riskRange" type="range" min="1" max="3" value="2" />
+                <span class="range-value" id="riskValue">平衡</span>
+              </div>
+            </div>
+
+            <button class="demo-cta" id="generateReport" type="button">启动 Agent 生成报告</button>
+          </aside>
+
+          <section class="product-panel agent-console">
+            <h3>Agent 实时生成过程</h3>
+            <p id="consoleSummary">等待启动。点击左侧按钮后，系统会模拟规划、检索、校验和报告组装。</p>
+            <div class="progress-rail">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="agent-step-list">
+              <div class="agent-step" data-demo-step="0">
+                <div class="step-dot">01</div>
+                <div>
+                  <strong>任务规划</strong>
+                  <span>判断当前策略应优先保专业、保学校，还是拉开冲稳保梯度。</span>
+                </div>
+              </div>
+              <div class="agent-step" data-demo-step="1">
+                <div class="step-dot">02</div>
+                <div>
+                  <strong>知识库检索</strong>
+                  <span>拉取虚构样例中的院校、专业、分数线和限制条件。</span>
+                </div>
+              </div>
+              <div class="agent-step" data-demo-step="2">
+                <div class="step-dot">03</div>
+                <div>
+                  <strong>冲稳保计算</strong>
+                  <span>根据风险偏好对候选学校分层，并生成解释理由。</span>
+                </div>
+              </div>
+              <div class="agent-step" data-demo-step="3">
+                <div class="step-dot">04</div>
+                <div>
+                  <strong>可信校验</strong>
+                  <span>检查专业限制、地域偏好和整体梯度是否存在明显风险。</span>
+                </div>
+              </div>
+              <div class="agent-step" data-demo-step="4">
+                <div class="step-dot">05</div>
+                <div>
+                  <strong>报告组装</strong>
+                  <span>输出策略摘要、志愿样例、风险提醒和下一步操作建议。</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="product-panel">
+            <h3>报告摘要</h3>
+            <p>点击生成后，这里会基于你的选择刷新策略口径和样例结果。</p>
+            <div class="report-preview">
+              <div class="score-card">
+                <strong id="strategyTitle">平衡型：专业优先，城市次优</strong>
+                <p id="strategyCopy">建议以计算机相关专业为主轴，江浙沪优先，但保留周边城市稳妥选项。</p>
+              </div>
+
+              <div class="school-result">
+                <span class="tier-tag">冲</span>
+                <strong id="rushSchool">苏州云启大学 · 软件工程</strong>
+                <span id="rushReason">城市与专业匹配度高，但热门专业竞争集中。</span>
+              </div>
+
+              <div class="school-result">
+                <span class="tier-tag">稳</span>
+                <strong id="steadySchool">南京信息科技大学 · 计算机类</strong>
+                <span id="steadyReason">位次区间更稳，专业方向与就业偏好一致。</span>
+              </div>
+
+              <div class="school-result">
+                <span class="tier-tag">保</span>
+                <strong id="safeSchool">杭州电子科技学院 · 电子信息类</strong>
+                <span id="safeReason">作为安全垫，同时保留向软件和智能方向延展的空间。</span>
+              </div>
+
+              <div class="scope-note" id="riskNote">
+                风险提醒：热门城市与热门专业叠加会抬高波动，建议保留 30% 稳妥志愿。
+              </div>
+            </div>
+          </aside>
         </div>
       </section>
     </section>
@@ -1780,14 +2221,218 @@
   <script>
     const tabs = document.querySelectorAll("[data-tab]");
     const panels = document.querySelectorAll(".tab-panel");
+    const eyebrow = document.querySelector(".eyebrow");
+    const pageTitle = document.querySelector("h1");
+    const pageIntro = document.querySelector(".header p");
+
+    const tabMeta = {
+      "tab-1": {
+        eyebrow: "Tab 1 · 系统架构总览",
+        title: "高考志愿报告 Agent 端到端系统架构",
+        intro: "以 Agent 决策引擎为中心，连接输入采集、知识工具支撑、可信校验与报告输出。"
+      },
+      "tab-2": {
+        eyebrow: "Tab 2 · Agent 决策引擎",
+        title: "规划、执行、检查、反思的 Agent 工作流",
+        intro: "展开 Agent 中枢如何把结构化考生档案转成可校验、可优化的志愿方案。"
+      },
+      "tab-3": {
+        eyebrow: "Tab 3 · 知识库与工具",
+        title: "Agent 背后的事实底座与工具调用",
+        intro: "说明模型如何调取知识库和工具完成查数、过滤、计算和排序。"
+      },
+      "tab-4": {
+        eyebrow: "Tab 4 · 可信校验",
+        title: "高风险决策场景里的可信机制",
+        intro: "拆解数据治理、运行时校验、风险暴露和问题回流，展示系统如何降低错误。"
+      },
+      "tab-5": {
+        eyebrow: "Tab 5 · 报告交付",
+        title: "从系统结果到用户可消费的完整报告",
+        intro: "展示报告内容、交互能力和产品联动，让输出成为后续决策链路的起点。"
+      },
+      "tab-6": {
+        eyebrow: "Tab 6 · AI 产品体验",
+        title: "可交互的志愿报告 Agent Demo",
+        intro: "模拟用户填写信息、Agent 生成报告、结果实时刷新的完整体验。"
+      }
+    };
+
+    document.addEventListener("pointermove", (event) => {
+      document.body.style.setProperty("--cursor-x", `${event.clientX}px`);
+      document.body.style.setProperty("--cursor-y", `${event.clientY}px`);
+    });
+
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add("visible");
+      });
+    }, { threshold: 0.14 });
+
+    function prepareInteractiveCards(root = document) {
+      const selectors = [
+        ".block", ".core-card", ".base", ".output-card", ".stage-card", ".strip-node",
+        ".handoff", ".knowledge-card", ".knowledge-metric", ".stack-card", ".tool-node",
+        ".trust-card", ".checkpoint", ".risk-node", ".delivery-card", ".report-card",
+        ".interaction-card", ".linkage-node", ".school-result"
+      ].join(",");
+
+      root.querySelectorAll(selectors).forEach((card) => {
+        card.classList.add("interactive-card", "reveal");
+        card.setAttribute("tabindex", "0");
+        revealObserver.observe(card);
+
+        card.addEventListener("click", () => focusCard(card));
+        card.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            focusCard(card);
+          }
+        });
+      });
+    }
+
+    const toast = document.createElement("div");
+    toast.className = "insight-toast";
+    document.body.appendChild(toast);
+
+    function focusCard(card) {
+      document.querySelectorAll(".interactive-card.selected").forEach((item) => item.classList.remove("selected"));
+      card.classList.add("selected");
+      const title = card.querySelector("h2, h3, h4, strong")?.textContent?.trim() || "已选中模块";
+      const desc = card.querySelector("p, span, li")?.textContent?.trim() || "这个模块可作为面试讲解中的聚焦点。";
+      toast.innerHTML = `<strong>${title}</strong><br>${desc}`;
+      toast.classList.add("show");
+      window.clearTimeout(window.toastTimer);
+      window.toastTimer = window.setTimeout(() => toast.classList.remove("show"), 2800);
+    }
 
     tabs.forEach((tab) => {
       tab.addEventListener("click", () => {
         const target = tab.dataset.tab;
         tabs.forEach((item) => item.classList.toggle("active", item === tab));
         panels.forEach((panel) => panel.classList.toggle("active", panel.id === target));
+        if (tabMeta[target]) {
+          eyebrow.textContent = tabMeta[target].eyebrow;
+          pageTitle.textContent = tabMeta[target].title;
+          pageIntro.textContent = tabMeta[target].intro;
+        }
+        const activePanel = document.getElementById(target);
+        activePanel?.querySelectorAll(".reveal").forEach((item, index) => {
+          window.setTimeout(() => item.classList.add("visible"), index * 35);
+        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       });
     });
+
+    prepareInteractiveCards();
+
+    const riskRange = document.getElementById("riskRange");
+    const riskValue = document.getElementById("riskValue");
+    const generateReport = document.getElementById("generateReport");
+    const progressFill = document.getElementById("progressFill");
+    const consoleSummary = document.getElementById("consoleSummary");
+    const demoSteps = document.querySelectorAll("[data-demo-step]");
+
+    const riskLabels = { 1: "保守", 2: "平衡", 3: "激进" };
+    const resultMap = {
+      "计算机": {
+        title: "平衡型：专业优先，城市次优",
+        copy: "建议以计算机相关专业为主轴，江浙沪优先，但保留周边城市稳妥选项。",
+        rush: ["苏州云启大学 · 软件工程", "城市与专业匹配度高，但热门专业竞争集中。"],
+        steady: ["南京信息科技大学 · 计算机类", "位次区间更稳，专业方向与就业偏好一致。"],
+        safe: ["杭州电子科技学院 · 电子信息类", "作为安全垫，同时保留向软件和智能方向延展的空间。"],
+        risk: "风险提醒：热门城市与热门专业叠加会抬高波动，建议保留 30% 稳妥志愿。"
+      },
+      "临床医学": {
+        title: "稳妥型：专业门槛优先校验",
+        copy: "医学类更看重专业限制和培养周期，建议优先检查选科、身体条件和院校培养质量。",
+        rush: ["东海医科大学 · 临床医学", "专业吸引力强，建议作为少量冲刺选择。"],
+        steady: ["齐鲁医学院 · 医学影像学", "专业相关度高，录取区间更稳定。"],
+        safe: ["鲁南健康学院 · 医学检验技术", "保底稳定性较强，适合兜底组合。"],
+        risk: "风险提醒：医学类需要重点核对身体条件、学制和转专业限制。"
+      },
+      "法学": {
+        title: "院校层次优先，兼顾城市资源",
+        copy: "法学更依赖学校平台、实习资源和城市机会，建议提高城市与院校层次权重。",
+        rush: ["华东政法学院 · 法学", "城市资源强，适合冲刺但竞争较集中。"],
+        steady: ["青岛财经政法大学 · 法学", "区域就业资源稳定，整体匹配度较高。"],
+        safe: ["济南文法学院 · 法学", "作为保底可保证专业方向不偏离。"],
+        risk: "风险提醒：法学方向要结合升学规划与法考路径，不宜只看学校名气。"
+      },
+      "汉语言": {
+        title: "考公与师范路径并行评估",
+        copy: "汉语言方向建议同时评估师范、综合院校和省内就业资源。",
+        rush: ["南京师范大学 · 汉语言文学", "专业声誉强，适合作为冲刺选择。"],
+        steady: ["山东师范大学 · 汉语言文学", "省内认可度高，考公和师范路径都较友好。"],
+        safe: ["曲阜师范学院 · 汉语言文学", "保底稳定，适合省内就业与继续深造。"],
+        risk: "风险提醒：若目标是考公，建议重点关注学校所在地岗位资源和专业限制。"
+      }
+    };
+
+    function currentChoice(groupName) {
+      return document.querySelector(`[data-choice-group="${groupName}"] .choice.active`)?.textContent.trim();
+    }
+
+    document.querySelectorAll("[data-choice-group]").forEach((group) => {
+      group.querySelectorAll(".choice").forEach((choice) => {
+        choice.addEventListener("click", () => {
+          group.querySelectorAll(".choice").forEach((item) => item.classList.remove("active"));
+          choice.classList.add("active");
+        });
+      });
+    });
+
+    if (riskRange) {
+      riskRange.addEventListener("input", () => {
+        riskValue.textContent = riskLabels[riskRange.value];
+      });
+    }
+
+    function updateReportResult() {
+      const major = currentChoice("major") || "计算机";
+      const city = currentChoice("city") || "江浙沪";
+      const risk = riskLabels[riskRange.value];
+      const data = resultMap[major] || resultMap["计算机"];
+
+      document.getElementById("strategyTitle").textContent = `${risk}型：${data.title}`;
+      document.getElementById("strategyCopy").textContent = `${data.copy} 当前地域偏好为「${city}」。`;
+      document.getElementById("rushSchool").textContent = data.rush[0];
+      document.getElementById("rushReason").textContent = data.rush[1];
+      document.getElementById("steadySchool").textContent = data.steady[0];
+      document.getElementById("steadyReason").textContent = data.steady[1];
+      document.getElementById("safeSchool").textContent = data.safe[0];
+      document.getElementById("safeReason").textContent = data.safe[1];
+      document.getElementById("riskNote").textContent = data.risk;
+    }
+
+    if (generateReport) {
+      generateReport.addEventListener("click", () => {
+        updateReportResult();
+        progressFill.style.width = "0%";
+        demoSteps.forEach((step) => step.classList.remove("active", "done"));
+        consoleSummary.textContent = "Agent 已启动，正在读取考生档案并生成任务计划...";
+
+        demoSteps.forEach((step, index) => {
+          window.setTimeout(() => {
+            demoSteps.forEach((item, i) => {
+              item.classList.toggle("done", i < index);
+              item.classList.toggle("active", i === index);
+            });
+            progressFill.style.width = `${(index + 1) * 20}%`;
+            const label = step.querySelector("strong").textContent;
+            consoleSummary.textContent = `正在执行：${label}。系统已根据你的选择刷新右侧报告摘要。`;
+            if (index === demoSteps.length - 1) {
+              window.setTimeout(() => {
+                demoSteps.forEach((item) => item.classList.add("done"));
+                demoSteps.forEach((item) => item.classList.remove("active"));
+                consoleSummary.textContent = "报告摘要已生成。你可以继续调整专业、地域或风险偏好再生成一次。";
+              }, 600);
+            }
+          }, index * 620);
+        });
+      });
+    }
   </script>
 </body>
 </html>
