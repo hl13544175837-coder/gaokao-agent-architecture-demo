@@ -1129,6 +1129,57 @@
       box-shadow: 0 0 0 4px rgba(63, 115, 255, 0.1);
     }
 
+    .hint-stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .hint-card {
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(63, 115, 255, 0.14);
+      background: linear-gradient(135deg, rgba(63, 115, 255, 0.08), rgba(255, 255, 255, 0.92));
+    }
+
+    .hint-card strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #173253;
+      font-size: 13px;
+    }
+
+    .hint-card span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .quick-scenarios {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .quick-scenario {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px 8px;
+      color: #415b77;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .quick-scenario:hover {
+      transform: translateY(-2px);
+      border-color: rgba(63, 115, 255, 0.38);
+      box-shadow: 0 14px 28px rgba(63, 115, 255, 0.12);
+    }
+
     .toggle-group {
       display: flex;
       flex-wrap: wrap;
@@ -1233,6 +1284,38 @@
       transition: width 650ms cubic-bezier(.2,.8,.2,1);
     }
 
+    .live-filter {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(63, 115, 255, 0.14);
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(238, 247, 255, 0.86)),
+        radial-gradient(circle at 80% 0%, rgba(96, 201, 255, 0.2), transparent 28%);
+    }
+
+    .live-filter strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .filter-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-chip-row span {
+      padding: 7px 9px;
+      border-radius: 999px;
+      color: #235073;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(63, 115, 255, 0.12);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
     .agent-step-list {
       display: grid;
       gap: 10px;
@@ -1304,6 +1387,34 @@
       font-size: 30px;
       letter-spacing: -0.05em;
       margin-bottom: 5px;
+    }
+
+    .mini-metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mini-metric {
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .mini-metric span {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .mini-metric strong {
+      display: block;
+      color: #173253;
+      font-size: 18px;
+      letter-spacing: -0.04em;
     }
 
     .school-result {
@@ -2151,9 +2262,25 @@
               </select>
             </div>
 
+            <div class="hint-stack">
+              <div class="hint-card">
+                <strong>省份政策识别</strong>
+                <span id="policyHint">山东采用新高考模式，报告会优先校验专业选科要求、位次区间和院校专业组约束。</span>
+              </div>
+              <div class="hint-card">
+                <strong>选科可报范围</strong>
+                <span id="subjectHint">物化生覆盖理工、医学、农学等方向，系统会重点过滤对物理/化学有硬性要求的专业。</span>
+              </div>
+            </div>
+
             <div class="form-row">
               <label for="score">分数 / 位次</label>
               <input class="demo-input" id="score" value="612 分 / 位次 14231" />
+              <div class="quick-scenarios" aria-label="快速填入样例考生">
+                <button class="quick-scenario" data-scenario="tech" type="button">理工高分</button>
+                <button class="quick-scenario" data-scenario="medical" type="button">医学稳妥</button>
+                <button class="quick-scenario" data-scenario="liberal" type="button">文科路径</button>
+              </div>
             </div>
 
             <div class="form-row">
@@ -2191,6 +2318,16 @@
             <p id="consoleSummary">等待启动。点击左侧按钮后，系统会模拟规划、检索、校验和报告组装。</p>
             <div class="progress-rail">
               <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="live-filter">
+              <strong>当前检索过滤条件</strong>
+              <div class="filter-chip-row">
+                <span id="filterProvince">山东</span>
+                <span id="filterSubject">物化生</span>
+                <span id="filterMajor">计算机</span>
+                <span id="filterCity">江浙沪</span>
+                <span id="filterRisk">平衡</span>
+              </div>
             </div>
             <div class="agent-step-list">
               <div class="agent-step" data-demo-step="0">
@@ -2238,6 +2375,21 @@
               <div class="score-card">
                 <strong id="strategyTitle">平衡型：专业优先，城市次优</strong>
                 <p id="strategyCopy">建议以计算机相关专业为主轴，江浙沪优先，但保留周边城市稳妥选项。</p>
+              </div>
+
+              <div class="mini-metric-grid">
+                <div class="mini-metric">
+                  <span>候选志愿池</span>
+                  <strong id="shortlistValue">48 个</strong>
+                </div>
+                <div class="mini-metric">
+                  <span>覆盖率</span>
+                  <strong id="coverageValue">86%</strong>
+                </div>
+                <div class="mini-metric">
+                  <span>可信度</span>
+                  <strong id="confidenceValue">92%</strong>
+                </div>
               </div>
 
               <div class="school-result">
@@ -2323,7 +2475,8 @@
         ".block", ".core-card", ".base", ".output-card", ".stage-card", ".strip-node",
         ".handoff", ".knowledge-card", ".knowledge-metric", ".stack-card", ".tool-node",
         ".trust-card", ".checkpoint", ".risk-node", ".delivery-card", ".report-card",
-        ".interaction-card", ".linkage-node", ".school-result"
+        ".interaction-card", ".linkage-node", ".school-result", ".hint-card",
+        ".quick-scenario", ".mini-metric", ".live-filter"
       ].join(",");
 
       root.querySelectorAll(selectors).forEach((card) => {
@@ -2383,7 +2536,9 @@
     const consoleSummary = document.getElementById("consoleSummary");
     const provinceSelect = document.getElementById("province");
     const subjectComboSelect = document.getElementById("subjectCombo");
+    const scoreInput = document.getElementById("score");
     const demoSteps = document.querySelectorAll("[data-demo-step]");
+    const scenarioButtons = document.querySelectorAll("[data-scenario]");
 
     const riskLabels = { 1: "保守", 2: "平衡", 3: "激进" };
     const resultMap = {
@@ -2421,8 +2576,105 @@
       }
     };
 
+    const provincePolicyMap = {
+      "北京": "北京采用新高考模式，院校专业组差异明显，报告会更重视城市资源与专业组限制。",
+      "天津": "天津采用新高考模式，报告会结合本地院校资源、位次波动和专业组要求进行过滤。",
+      "河北": "河北采用新高考模式，报告会重点处理物理/历史科目组、院校专业组和省内外梯度。",
+      "山西": "山西录取批次和位次参考需要跨年校准，系统会优先给出稳妥梯度和保底解释。",
+      "内蒙古": "内蒙古样例会重点关注批次线、地域距离和专业可报范围，避免只按学校名气排序。",
+      "辽宁": "辽宁采用新高考模式，报告会按物理/历史组与专业组要求进行约束过滤。",
+      "吉林": "吉林样例会结合批次线、专业限制和省内外院校偏好，形成冲稳保组合。",
+      "黑龙江": "黑龙江样例会重点校验批次线、位次稳定性和省内外院校梯度。",
+      "上海": "上海采用新高考模式，院校专业组颗粒度高，报告会优先校验专业组与选科匹配。",
+      "江苏": "江苏采用新高考模式，专业组差异大，报告会重点拆解同校不同专业组的风险。",
+      "浙江": "浙江采用新高考模式，专业平行志愿颗粒度细，报告会更关注专业可报和位次稳定。",
+      "安徽": "安徽样例会结合新高考改革后的科目组、批次规则与省内外院校偏好。",
+      "福建": "福建采用新高考模式，报告会按物理/历史组、专业要求和地域偏好过滤。",
+      "江西": "江西样例会关注改革衔接期的位次参考、专业组约束和稳妥保底。",
+      "山东": "山东采用新高考模式，报告会优先校验专业选科要求、位次区间和院校专业组约束。",
+      "河南": "河南考生规模大，报告会更强调位次稳定性、保底厚度和热门专业风险。",
+      "湖北": "湖北采用新高考模式，报告会按科目组、院校专业组和城市资源综合排序。",
+      "湖南": "湖南采用新高考模式，报告会重点处理物理/历史组与专业组的可报边界。",
+      "广东": "广东采用新高考模式，城市与院校热度差异明显，报告会重点控制热门城市波动。",
+      "广西": "广西样例会关注批次规则、省内外流动和专业限制，避免梯度过窄。",
+      "海南": "海南采用新高考模式，报告会结合转换分、专业组要求和地域选择做模拟过滤。",
+      "重庆": "重庆采用新高考模式，报告会按物理/历史组、院校专业组和成渝资源进行排序。",
+      "四川": "四川样例会重点关注省内强校、成渝城市资源和保底院校厚度。",
+      "贵州": "贵州样例会关注批次线、地域偏好和专业可报范围，优先保障稳妥性。",
+      "云南": "云南样例会结合批次线、民族地区政策提示和省内外院校梯度。",
+      "西藏": "西藏样例会重点提示专项政策、地域因素和招生计划稀疏带来的不确定性。",
+      "陕西": "陕西样例会关注西安高校资源、批次线和专业冷热波动。",
+      "甘肃": "甘肃样例会重点校验批次线、省内外梯度和稳妥保底比例。",
+      "青海": "青海样例会提示招生计划较少、批次波动和地域适配风险。",
+      "宁夏": "宁夏样例会关注招生计划密度、批次线和省外院校可行性。",
+      "新疆": "新疆样例会重点提示专项政策、地域距离和招生计划波动。",
+      "香港": "香港样例作为扩展地区展示，正式填报需单独校验招生渠道与报考规则。",
+      "澳门": "澳门样例作为扩展地区展示，正式填报需单独校验招生渠道与报考规则。",
+      "台湾": "台湾样例作为扩展地区展示，正式填报需单独校验招生渠道与报考规则。"
+    };
+
+    const subjectHintMap = {
+      "物化生": "物化生覆盖理工、医学、农学等方向，系统会重点过滤对物理/化学有硬性要求的专业。",
+      "物化政": "物化政适合理工、法政交叉和部分公安政法方向，系统会提示化学/政治相关限制。",
+      "物化地": "物化地适合理工、地理信息、建筑规划等方向，系统会优先保留物理化学要求专业。",
+      "物生地": "物生地适合生命科学、地理信息和部分理工方向，系统会额外提示化学受限专业。",
+      "物政地": "物政地兼顾理工和社科方向，系统会提示化学、生物硬限制带来的不可报专业。",
+      "史政地": "史政地偏人文社科、法学、新闻、公共管理方向，系统会过滤强物理要求专业。",
+      "史政生": "史政生适合人文社科、护理、心理等方向，系统会提示医学类硬性选科限制。",
+      "史地生": "史地生适合师范、人文、地理和生命相关方向，系统会提示理工类覆盖不足风险。",
+      "物化技": "物化技适合浙江等技术选科场景，系统会按技术科目和专业组要求做模拟匹配。",
+      "不限": "不限代表未设置硬性选科偏好，系统会先做宽召回，再在风险校验阶段提示缺失条件。",
+      "文科": "文科路径会优先关注院校层次、城市资源、考公考研和专业就业出口。",
+      "理科": "理科路径会优先关注理工医学专业门槛、实验条件和专业热度波动。"
+    };
+
+    const scenarioMap = {
+      tech: {
+        province: "山东",
+        subject: "物化生",
+        score: "612 分 / 位次 14231",
+        major: "计算机",
+        city: "江浙沪",
+        risk: "2"
+      },
+      medical: {
+        province: "河南",
+        subject: "物化生",
+        score: "598 分 / 位次 21860",
+        major: "临床医学",
+        city: "省内优先",
+        risk: "1"
+      },
+      liberal: {
+        province: "浙江",
+        subject: "史政地",
+        score: "635 分 / 位次 8930",
+        major: "法学",
+        city: "新一线",
+        risk: "3"
+      }
+    };
+
     function currentChoice(groupName) {
       return document.querySelector(`[data-choice-group="${groupName}"] .choice.active`)?.textContent.trim();
+    }
+
+    function setChoice(groupName, value) {
+      const group = document.querySelector(`[data-choice-group="${groupName}"]`);
+      group?.querySelectorAll(".choice").forEach((choice) => {
+        choice.classList.toggle("active", choice.textContent.trim() === value);
+      });
+    }
+
+    function calculateMetrics(province, subjectCombo, risk, major) {
+      const provinceWeight = province.length > 2 ? 2 : 0;
+      const subjectWeight = subjectCombo.includes("物") ? 6 : subjectCombo.includes("理") ? 5 : 2;
+      const majorWeight = major === "临床医学" ? -5 : major === "计算机" ? 4 : 1;
+      const riskWeight = Number(riskRange?.value || 2) * 4;
+      const shortlist = Math.max(28, Math.min(76, 42 + subjectWeight + riskWeight + provinceWeight + majorWeight));
+      const coverage = Math.max(72, Math.min(96, 80 + subjectWeight + Number(riskRange?.value || 2) * 3));
+      const confidence = Math.max(82, Math.min(98, 91 + subjectWeight - Math.abs(Number(riskRange?.value || 2) - 2) * 3));
+      return { shortlist, coverage, confidence };
     }
 
     document.querySelectorAll("[data-choice-group]").forEach((group) => {
@@ -2449,6 +2701,7 @@
       const subjectCombo = subjectComboSelect?.value || "物化生";
       const risk = riskLabels[riskRange?.value || 2];
       const data = resultMap[major] || resultMap["计算机"];
+      const metrics = calculateMetrics(province, subjectCombo, risk, major);
 
       document.getElementById("strategyTitle").textContent = `${risk}型：${data.title}`;
       document.getElementById("strategyCopy").textContent = `${data.copy} 当前省份/地区为「${province}」，选科/科类为「${subjectCombo}」，地域偏好为「${city}」。`;
@@ -2459,12 +2712,38 @@
       document.getElementById("safeSchool").textContent = data.safe[0];
       document.getElementById("safeReason").textContent = data.safe[1];
       document.getElementById("riskNote").textContent = `${data.risk} 已按「${province}」招生批次规则与「${subjectCombo}」选科约束进行模拟过滤。`;
+      document.getElementById("policyHint").textContent = provincePolicyMap[province] || provincePolicyMap["山东"];
+      document.getElementById("subjectHint").textContent = subjectHintMap[subjectCombo] || subjectHintMap["物化生"];
+      document.getElementById("filterProvince").textContent = province;
+      document.getElementById("filterSubject").textContent = subjectCombo;
+      document.getElementById("filterMajor").textContent = major;
+      document.getElementById("filterCity").textContent = city;
+      document.getElementById("filterRisk").textContent = risk;
+      document.getElementById("shortlistValue").textContent = `${metrics.shortlist} 个`;
+      document.getElementById("coverageValue").textContent = `${metrics.coverage}%`;
+      document.getElementById("confidenceValue").textContent = `${metrics.confidence}%`;
     }
 
     [provinceSelect, subjectComboSelect].forEach((select) => {
       select?.addEventListener("change", () => {
         updateReportResult();
         consoleSummary.textContent = `已切换为「${provinceSelect.value} / ${subjectComboSelect.value}」考生档案，右侧报告摘要已实时刷新。`;
+      });
+    });
+
+    scenarioButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const scenario = scenarioMap[button.dataset.scenario];
+        if (!scenario) return;
+        provinceSelect.value = scenario.province;
+        subjectComboSelect.value = scenario.subject;
+        scoreInput.value = scenario.score;
+        riskRange.value = scenario.risk;
+        riskValue.textContent = riskLabels[scenario.risk];
+        setChoice("major", scenario.major);
+        setChoice("city", scenario.city);
+        updateReportResult();
+        consoleSummary.textContent = `已载入「${button.textContent.trim()}」样例，Agent 输入档案和报告摘要已同步刷新。`;
       });
     });
 
