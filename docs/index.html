@@ -2094,11 +2094,60 @@
             <p>模拟真实用户入口：补齐关键信息后，Agent 会生成一份可解释的志愿策略摘要。</p>
 
             <div class="form-row">
-              <label for="province">省份与选科</label>
+              <label for="province">省份 / 地区</label>
               <select class="demo-select" id="province">
-                <option>山东 · 物化生</option>
-                <option>浙江 · 物化政</option>
-                <option>江苏 · 物化地</option>
+                <option>北京</option>
+                <option>天津</option>
+                <option>河北</option>
+                <option>山西</option>
+                <option>内蒙古</option>
+                <option>辽宁</option>
+                <option>吉林</option>
+                <option>黑龙江</option>
+                <option>上海</option>
+                <option>江苏</option>
+                <option>浙江</option>
+                <option>安徽</option>
+                <option>福建</option>
+                <option>江西</option>
+                <option selected>山东</option>
+                <option>河南</option>
+                <option>湖北</option>
+                <option>湖南</option>
+                <option>广东</option>
+                <option>广西</option>
+                <option>海南</option>
+                <option>重庆</option>
+                <option>四川</option>
+                <option>贵州</option>
+                <option>云南</option>
+                <option>西藏</option>
+                <option>陕西</option>
+                <option>甘肃</option>
+                <option>青海</option>
+                <option>宁夏</option>
+                <option>新疆</option>
+                <option>香港</option>
+                <option>澳门</option>
+                <option>台湾</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="subjectCombo">选科 / 科类</label>
+              <select class="demo-select" id="subjectCombo">
+                <option selected>物化生</option>
+                <option>物化政</option>
+                <option>物化地</option>
+                <option>物生地</option>
+                <option>物政地</option>
+                <option>史政地</option>
+                <option>史政生</option>
+                <option>史地生</option>
+                <option>物化技</option>
+                <option>不限</option>
+                <option>文科</option>
+                <option>理科</option>
               </select>
             </div>
 
@@ -2332,6 +2381,8 @@
     const generateReport = document.getElementById("generateReport");
     const progressFill = document.getElementById("progressFill");
     const consoleSummary = document.getElementById("consoleSummary");
+    const provinceSelect = document.getElementById("province");
+    const subjectComboSelect = document.getElementById("subjectCombo");
     const demoSteps = document.querySelectorAll("[data-demo-step]");
 
     const riskLabels = { 1: "保守", 2: "平衡", 3: "激进" };
@@ -2379,6 +2430,7 @@
         choice.addEventListener("click", () => {
           group.querySelectorAll(".choice").forEach((item) => item.classList.remove("active"));
           choice.classList.add("active");
+          updateReportResult();
         });
       });
     });
@@ -2386,32 +2438,46 @@
     if (riskRange) {
       riskRange.addEventListener("input", () => {
         riskValue.textContent = riskLabels[riskRange.value];
+        updateReportResult();
       });
     }
 
     function updateReportResult() {
       const major = currentChoice("major") || "计算机";
       const city = currentChoice("city") || "江浙沪";
-      const risk = riskLabels[riskRange.value];
+      const province = provinceSelect?.value || "山东";
+      const subjectCombo = subjectComboSelect?.value || "物化生";
+      const risk = riskLabels[riskRange?.value || 2];
       const data = resultMap[major] || resultMap["计算机"];
 
       document.getElementById("strategyTitle").textContent = `${risk}型：${data.title}`;
-      document.getElementById("strategyCopy").textContent = `${data.copy} 当前地域偏好为「${city}」。`;
+      document.getElementById("strategyCopy").textContent = `${data.copy} 当前省份/地区为「${province}」，选科/科类为「${subjectCombo}」，地域偏好为「${city}」。`;
       document.getElementById("rushSchool").textContent = data.rush[0];
       document.getElementById("rushReason").textContent = data.rush[1];
       document.getElementById("steadySchool").textContent = data.steady[0];
       document.getElementById("steadyReason").textContent = data.steady[1];
       document.getElementById("safeSchool").textContent = data.safe[0];
       document.getElementById("safeReason").textContent = data.safe[1];
-      document.getElementById("riskNote").textContent = data.risk;
+      document.getElementById("riskNote").textContent = `${data.risk} 已按「${province}」招生批次规则与「${subjectCombo}」选科约束进行模拟过滤。`;
     }
+
+    [provinceSelect, subjectComboSelect].forEach((select) => {
+      select?.addEventListener("change", () => {
+        updateReportResult();
+        consoleSummary.textContent = `已切换为「${provinceSelect.value} / ${subjectComboSelect.value}」考生档案，右侧报告摘要已实时刷新。`;
+      });
+    });
+
+    updateReportResult();
 
     if (generateReport) {
       generateReport.addEventListener("click", () => {
+        const province = provinceSelect?.value || "山东";
+        const subjectCombo = subjectComboSelect?.value || "物化生";
         updateReportResult();
         progressFill.style.width = "0%";
         demoSteps.forEach((step) => step.classList.remove("active", "done"));
-        consoleSummary.textContent = "Agent 已启动，正在读取考生档案并生成任务计划...";
+        consoleSummary.textContent = `Agent 已启动，正在读取「${province} / ${subjectCombo}」考生档案并生成任务计划...`;
 
         demoSteps.forEach((step, index) => {
           window.setTimeout(() => {
